@@ -3050,6 +3050,11 @@ export interface Nursery {
 	 */
 	noConstantComparisons?: NoConstantComparisonsConfiguration;
 	/**
+	 * Disallow process.env in Convex functions.
+	 * See https://biomejs.dev/linter/rules/no-convex-process-env
+	 */
+	noConvexProcessEnv?: NoConvexProcessEnvConfiguration;
+	/**
 	 * Disallow names that start or end with an underscore.
 	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
 	 */
@@ -6950,6 +6955,9 @@ export type NoConsoleSpacesConfiguration =
 export type NoConstantComparisonsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConstantComparisonsOptions;
+export type NoConvexProcessEnvConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConvexProcessEnvOptions;
 export type NoDanglingUnderscoreConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDanglingUnderscoreOptions;
@@ -10146,6 +10154,14 @@ export interface RuleWithNoConsoleSpacesOptions {
 export interface RuleWithNoConstantComparisonsOptions {
 	level: RulePlainConfiguration;
 	options?: NoConstantComparisonsOptions;
+}
+export interface RuleWithNoConvexProcessEnvOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConvexProcessEnvOptions;
 }
 export interface RuleWithNoDanglingUnderscoreOptions {
 	level: RulePlainConfiguration;
@@ -13960,6 +13976,7 @@ export type NoChainedComparisonOptions = {};
 export type NoConfusingArraySpliceOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoConstantComparisonsOptions = {};
+export type NoConvexProcessEnvOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDisabledAttributeOptions = {};
 export type NoDoubleComparisonOptions = {};
@@ -16523,6 +16540,7 @@ export type Category =
 	| "lint/nursery/noConfusingArraySplice"
 	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noConstantComparisons"
+	| "lint/nursery/noConvexProcessEnv"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDisabledAttribute"
 	| "lint/nursery/noDoubleComparison"
