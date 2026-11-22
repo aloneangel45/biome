@@ -12,6 +12,7 @@ pub mod batch;
 pub mod condition;
 pub mod function_return;
 pub mod indexed_collection;
+pub mod module_exports;
 pub mod rename;
 pub mod same_reference;
 #[cfg(test)]

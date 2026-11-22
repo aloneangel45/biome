@@ -3070,6 +3070,11 @@ export interface Nursery {
 	 */
 	noDrizzleDbObjectInsideTransaction?: NoDrizzleDbObjectInsideTransactionConfiguration;
 	/**
+	 * Disallow exporting the same name more than once.
+	 * See https://biomejs.dev/linter/rules/no-duplicate-exports
+	 */
+	noDuplicateExports?: NoDuplicateExportsConfiguration;
+	/**
 	 * Disallow two keys with the same name inside YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-map-keys
 	 */
@@ -3674,6 +3679,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-useless-qualifier
 	 */
 	noUselessQualifier?: NoUselessQualifierConfiguration;
+	/**
+	 * Disallow export * from a module that has no named exports.
+	 * See https://biomejs.dev/linter/rules/no-useless-re-export-all
+	 */
+	noUselessReExportAll?: NoUselessReExportAllConfiguration;
 	/**
 	 * Disallow functions that return a call to themselves when a loop can do the same work.
 	 * See https://biomejs.dev/linter/rules/no-useless-recursion
@@ -6962,6 +6972,9 @@ export type NoDoubleComparisonConfiguration =
 export type NoDrizzleDbObjectInsideTransactionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDrizzleDbObjectInsideTransactionOptions;
+export type NoDuplicateExportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateExportsOptions;
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
@@ -7325,6 +7338,9 @@ export type NoUselessParameterPropertyAssignmentConfiguration =
 export type NoUselessQualifierConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessQualifierOptions;
+export type NoUselessReExportAllConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessReExportAllOptions;
 export type NoUselessRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessRecursionOptions;
@@ -10171,6 +10187,10 @@ export interface RuleWithNoDrizzleDbObjectInsideTransactionOptions {
 	level: RulePlainConfiguration;
 	options?: NoDrizzleDbObjectInsideTransactionOptions;
 }
+export interface RuleWithNoDuplicateExportsOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateExportsOptions;
+}
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
@@ -10810,6 +10830,10 @@ export interface RuleWithNoUselessQualifierOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessQualifierOptions;
+}
+export interface RuleWithNoUselessReExportAllOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessReExportAllOptions;
 }
 export interface RuleWithNoUselessRecursionOptions {
 	level: RulePlainConfiguration;
@@ -13969,6 +13993,7 @@ export interface NoDrizzleDbObjectInsideTransactionOptions {
 	 */
 	drizzleObjectName?: string[];
 }
+export type NoDuplicateExportsOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export interface NoDuplicateTypeConstituentsOptions {
 	/**
@@ -14338,6 +14363,7 @@ export type NoUselessLengthCheckOptions = {};
 export type NoUselessNestedTernaryOptions = {};
 export type NoUselessParameterPropertyAssignmentOptions = {};
 export type NoUselessQualifierOptions = {};
+export type NoUselessReExportAllOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSetConstructionOptions = {};
 export type NoUselessSpliceOptions = {};
@@ -16529,6 +16555,7 @@ export type Category =
 	| "lint/nursery/noDrizzleDbObjectInsideTransaction"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDuplicateExports"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
@@ -16673,6 +16700,7 @@ export type Category =
 	| "lint/nursery/noUselessNestedTernary"
 	| "lint/nursery/noUselessParameterPropertyAssignment"
 	| "lint/nursery/noUselessQualifier"
+	| "lint/nursery/noUselessReExportAll"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSetConstruction"
 	| "lint/nursery/noUselessSplice"
