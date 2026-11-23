@@ -3070,6 +3070,11 @@ export interface Nursery {
 	 */
 	noDrizzleDbObjectInsideTransaction?: NoDrizzleDbObjectInsideTransactionConfiguration;
 	/**
+	 * Disallow two branches next to each other in an if statement from running the same code.
+	 * See https://biomejs.dev/linter/rules/no-duplicate-if-branches
+	 */
+	noDuplicateIfBranches?: NoDuplicateIfBranchesConfiguration;
+	/**
 	 * Disallow two keys with the same name inside YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-map-keys
 	 */
@@ -6962,6 +6967,9 @@ export type NoDoubleComparisonConfiguration =
 export type NoDrizzleDbObjectInsideTransactionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDrizzleDbObjectInsideTransactionOptions;
+export type NoDuplicateIfBranchesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateIfBranchesOptions;
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
@@ -10170,6 +10178,10 @@ export interface RuleWithNoDoubleComparisonOptions {
 export interface RuleWithNoDrizzleDbObjectInsideTransactionOptions {
 	level: RulePlainConfiguration;
 	options?: NoDrizzleDbObjectInsideTransactionOptions;
+}
+export interface RuleWithNoDuplicateIfBranchesOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateIfBranchesOptions;
 }
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
@@ -13969,6 +13981,7 @@ export interface NoDrizzleDbObjectInsideTransactionOptions {
 	 */
 	drizzleObjectName?: string[];
 }
+export type NoDuplicateIfBranchesOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export interface NoDuplicateTypeConstituentsOptions {
 	/**
@@ -16530,6 +16543,7 @@ export type Category =
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateIfBranches"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDuplicateTypeConstituents"
