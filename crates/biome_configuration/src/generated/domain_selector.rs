@@ -436,6 +436,8 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "biomePlugin" => BIOMEPLUGIN_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "convex" => CONVEX_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
