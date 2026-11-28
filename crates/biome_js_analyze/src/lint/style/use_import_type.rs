@@ -224,7 +224,10 @@ impl Rule for UseImportType {
                             Some(NamedImportTypeFix::AddInlineTypeQualifiers(specifiers)) => {
                                 if is_default_used_as_type {
                                     if style == Style::SeparatedType {
-                                        Some(ImportTypeFix::UseSplitImportType(specifiers))
+                                        Some(ImportTypeFix::UseSplitImportType {
+                                            is_default_type: true,
+                                            specifiers,
+                                        })
                                     } else {
                                         Some(ImportTypeFix::ExtractDefaultImportType(specifiers))
                                     }
@@ -242,7 +245,10 @@ impl Rule for UseImportType {
                             }
                             Some(NamedImportTypeFix::CanSeparateType) => {
                                 if style == Style::SeparatedType {
-                                    Some(ImportTypeFix::UseSplitImportType(Box::default()))
+                                    Some(ImportTypeFix::UseSplitImportType {
+                                        is_default_type: is_default_used_as_type,
+                                        specifiers: Box::default(),
+                                    })
                                 } else {
                                     None
                                 }
@@ -325,7 +331,10 @@ impl Rule for UseImportType {
                     }
                     NamedImportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                         if style == Style::SeparatedType {
-                            Some(ImportTypeFix::UseSplitImportType(specifiers))
+                            Some(ImportTypeFix::UseSplitImportType {
+                                is_default_type: false,
+                                specifiers,
+                            })
                         } else {
                             Some(ImportTypeFix::AddTypeQualifiers(specifiers))
                         }
@@ -335,7 +344,10 @@ impl Rule for UseImportType {
                     }
                     NamedImportTypeFix::CanSeparateType => {
                         if style == Style::SeparatedType {
-                            Some(ImportTypeFix::UseSplitImportType(Box::default()))
+                            Some(ImportTypeFix::UseSplitImportType {
+                                is_default_type: false,
+                                specifiers: Box::default(),
+                            })
                         } else {
                             None
                         }
@@ -367,7 +379,7 @@ impl Rule for UseImportType {
                 import_clause.range(),
                 "All these imports are only used as types.",
             ),
-            ImportTypeFix::UseSplitImportType(_) => RuleDiagnostic::new(
+            ImportTypeFix::UseSplitImportType { .. } => RuleDiagnostic::new(
                 rule_category!(),
                 import_clause.range(),
                 "Separate type imports from other imports.",
@@ -541,67 +553,66 @@ impl Rule for UseImportType {
                     mutation.replace_node(import_clause, new_import_clause);
                 }
             },
-            ImportTypeFix::UseSplitImportType(specifiers_requiring_type_marker) => {
-                match import_clause {
-                    AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
-                        let type_token = Some(make::token(T![type]).with_trailing_space());
-                        let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named)) =
-                            import_combined_clause.specifier()
-                        else {
-                            return None;
-                        };
-                        let default_clause = extract_into_default_import_clause(
-                            &import_combined_clause,
-                            type_token.clone(),
-                        )
-                        .ok()?;
-                        let default_import =
-                            import.clone().with_import_clause(default_clause.into());
-                        let (named_type, named_value) =
-                            split_named_import_specifiers(named, specifiers_requiring_type_marker)?;
-                        let (import_named_type, import_named_value) = new_named_imports(
-                            None,
-                            named_type,
-                            named_value,
-                            import_combined_clause.from_token().ok()?,
-                            import_combined_clause.source().ok()?,
-                            import.semicolon_token(),
-                        );
-                        add_module_items(
-                            &mut mutation,
-                            import.syntax(),
-                            [
-                                default_import.into(),
-                                import_named_type.into(),
-                                import_named_value.into(),
-                            ],
-                        );
-                    }
-                    AnyJsImportClause::JsImportNamedClause(import_clause) => {
-                        let named_specifiers = import_clause.named_specifiers().ok()?;
-                        let (named_type, named_value) = split_named_import_specifiers(
-                            named_specifiers,
-                            specifiers_requiring_type_marker,
-                        )?;
-                        let (import_named_type, import_named_value) = new_named_imports(
-                            None,
-                            named_type,
-                            named_value,
-                            import_clause.from_token().ok()?,
-                            import_clause.source().ok()?,
-                            import.semicolon_token(),
-                        );
-                        add_module_items(
-                            &mut mutation,
-                            import.syntax(),
-                            [import_named_type.into(), import_named_value.into()],
-                        );
-                    }
-                    _ => {
+            ImportTypeFix::UseSplitImportType {
+                is_default_type,
+                specifiers: specifiers_requiring_type_marker,
+            } => match import_clause {
+                AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
+                    let type_token =
+                        is_default_type.then(|| make::token(T![type]).with_trailing_space());
+                    let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named)) =
+                        import_combined_clause.specifier()
+                    else {
                         return None;
-                    }
+                    };
+                    let default_clause =
+                        extract_into_default_import_clause(&import_combined_clause, type_token)
+                            .ok()?;
+                    let default_import = import.clone().with_import_clause(default_clause.into());
+                    let (named_type, named_value) =
+                        split_named_import_specifiers(named, specifiers_requiring_type_marker)?;
+                    let (import_named_type, import_named_value) = new_named_imports(
+                        None,
+                        named_type,
+                        named_value,
+                        import_combined_clause.from_token().ok()?,
+                        import_combined_clause.source().ok()?,
+                        import.semicolon_token(),
+                    );
+                    add_module_items(
+                        &mut mutation,
+                        import.syntax(),
+                        [
+                            default_import.into(),
+                            import_named_type.into(),
+                            import_named_value.into(),
+                        ],
+                    );
                 }
-            }
+                AnyJsImportClause::JsImportNamedClause(import_clause) => {
+                    let named_specifiers = import_clause.named_specifiers().ok()?;
+                    let (named_type, named_value) = split_named_import_specifiers(
+                        named_specifiers,
+                        specifiers_requiring_type_marker,
+                    )?;
+                    let (import_named_type, import_named_value) = new_named_imports(
+                        None,
+                        named_type,
+                        named_value,
+                        import_clause.from_token().ok()?,
+                        import_clause.source().ok()?,
+                        import.semicolon_token(),
+                    );
+                    add_module_items(
+                        &mut mutation,
+                        import.syntax(),
+                        [import_named_type.into(), import_named_value.into()],
+                    );
+                }
+                _ => {
+                    return None;
+                }
+            },
             ImportTypeFix::ExtractDefaultImportType(specifiers_requiring_type_marker) => {
                 let import_combined_clause = import_clause.as_js_import_combined_clause()?;
                 let default_import_clause = extract_into_default_import_clause(
@@ -789,7 +800,10 @@ pub struct ImportTypeOptions {}
 #[derive(Debug)]
 pub enum ImportTypeFix {
     UseImportType,
-    UseSplitImportType(Box<[AnyJsNamedImportSpecifier]>),
+    UseSplitImportType {
+        is_default_type: bool,
+        specifiers: Box<[AnyJsNamedImportSpecifier]>,
+    },
     ExtractDefaultImportType(Box<[AnyJsNamedImportSpecifier]>),
     ExtractCombinedImportType(Box<[AnyJsNamedImportSpecifier]>),
     AddTypeQualifiers(Box<[AnyJsNamedImportSpecifier]>),
